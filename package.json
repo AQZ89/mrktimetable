@@ -1,0 +1,30 @@
+{
+  "name": "wwbot",
+  "version": "1.0.0",
+  "description": "telebotmeh",
+  "main": "hello.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js --ext js"
+  },
+  "keywords": [
+    "node",
+    "telegram"
+  ],
+  "author": "Daniil Neliubin <neliubin12@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.2",
+    "grammy": "^1.7.0",
+    "node-fetch": "^2.6.6"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.16.7",
+    "@babel/core": "^7.16.7",
+    "@babel/node": "^7.16.7",
+    "@babel/preset-env": "^7.16.7",
+    "@types/express": "^4.17.13",
+    "@types/node": "^17.0.18"
+  }
+}

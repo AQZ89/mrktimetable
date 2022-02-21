@@ -67,8 +67,10 @@ async function getTT(url) {
     const dom = new JSDOM(data);
     const link = dom.window.document.getElementById("rasp").href;
     const rasp = await fetch(link);
-    const pdf = await rasp.blob();
-    console.log(pdf);
+    const pdf = await rasp.arrayBuffer();
+    fs.writeFileSync("rsp.pdf", pdf, 'binary')
+
+    //console.log(pdf);
 }
 
 //getTT("https://www.mrk-bsuir.by/ru")

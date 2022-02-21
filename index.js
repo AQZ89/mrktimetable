@@ -1,6 +1,9 @@
 const { Bot } = require('grammy');
 const { webhookCallback } = require("grammy");
 const fetch = require('node-fetch');
+const fs = require('fs');
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 const express = require("express");
 
@@ -32,11 +35,43 @@ if (process.env.NODE_ENV === 'production') {
     bot.start();
 }
 
-bot.command("photo", async ctx => {
-    const response = await fetch("https://aws.random.cat/meow");
-    const data = await response.json();
-    return ctx.replyWithPhoto(data.file);
+//Вывод в консоль
+async function idAndMessage(ctx, next) {
+    try {
+        if (ctx.message) console.log(`${ctx.from.first_name ? ctx.from.first_name : ctx.from.id}: ${ctx.message.text}`)
+        else console.log(`${ctx.from.first_name ? ctx.from.first_name : ctx.from.id}: ${ctx.callbackQuery ? `(cbq)` + ctx.callbackQuery.data : "unknown"}`)
+        await next();
+    } catch (e) {
+        console.log(e);
+    }
+}
+bot.use(idAndMessage);
+
+bot.command("timetable", async ctx => {
+    const response = await fetch("https://www.mrk-bsuir.by/ru");
+    const data = await response.text();
+
+    const dom = new JSDOM(data);
+    const link = dom.window.document.getElementById("rasp").href;
+    const rasp = await fetch(link);
+
+    return ctx.reply(link);
 });
+
+
+
+async function getTT(url) {
+    const response = await fetch(url);
+    const data = await response.text();
+
+    const dom = new JSDOM(data);
+    const link = dom.window.document.getElementById("rasp").href;
+    const rasp = await fetch(link);
+    const pdf = await rasp.blob();
+    console.log(pdf);
+}
+
+//getTT("https://www.mrk-bsuir.by/ru")
 
 
 

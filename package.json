@@ -17,6 +17,7 @@
   "dependencies": {
     "express": "^4.17.2",
     "grammy": "^1.7.0",
+    "jsdom": "^19.0.0",
     "node-fetch": "^2.6.6"
   },
   "devDependencies": {

@@ -47,33 +47,39 @@ async function idAndMessage(ctx, next) {
 }
 bot.use(idAndMessage);
 
-bot.command("timetable", async ctx => {
-    const response = await fetch("https://www.mrk-bsuir.by/ru");
-    const data = await response.text();
-
-    const dom = new JSDOM(data);
-    const link = dom.window.document.getElementById("rasp").href;
-    const rasp = await fetch(link);
-
-    return ctx.reply(link);
-});
-
-
+let link = "https://www.mrk-bsuir.by/files/bbb22.02.2022.pdf";
 
 async function getTT(url) {
     const response = await fetch(url);
     const data = await response.text();
 
     const dom = new JSDOM(data);
-    const link = dom.window.document.getElementById("rasp").href;
-    const rasp = await fetch(link);
-    const pdf = await rasp.arrayBuffer();
-    fs.writeFileSync("rsp.pdf", pdf, 'binary')
-
-    //console.log(pdf);
+    link = dom.window.document.getElementById("rasp").href;
 }
 
-//getTT("https://www.mrk-bsuir.by/ru")
+getTT("https://www.mrk-bsuir.by/ru");
+
+bot.command("timetable", async ctx => {
+    return ctx.reply(`Последнее расписание: ${link}`);
+});
+
+setTimeout(async function check() {
+    try {
+        const response = await fetch("https://www.mrk-bsuir.by/ru");
+        const data = await response.text();
+
+        const dom = new JSDOM(data);
+        const newlink = dom.window.document.getElementById("rasp").href;
+        if (newlink == link);
+        else {
+            link = newlink;
+            bot.api.sendMessage(977463270, `Расписание обновилось: ${link}`)
+        }
+    } catch (e) {
+        console.log(e)
+    }
+    setTimeout(check, 300000)
+}, 300000)
 
 
 

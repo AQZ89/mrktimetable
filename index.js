@@ -3,10 +3,27 @@ const { webhookCallback } = require("grammy");
 const fetch = require('node-fetch');
 const fs = require('fs');
 const jsdom = require("jsdom");
+const path = require('path');
 const { JSDOM } = jsdom;
+const pdfConverter = require("pdf-poppler");
+
+function convertImage(pdfPath) {
+    let option = {
+        format: 'jpeg',
+        out_dir: './ttpics',
+        out_prefix: path.basename(pdfPath, path.extname(pdfPath)),
+        page: 0
+    }
+    pdfConverter.convert(pdfPath, option)
+        .then(() => {
+            console.log('file converted')
+        })
+        .catch(err => {
+            console.log('an error has occurred in the pdf converter ' + err)
+        })
+}
 
 const express = require("express");
-
 
 let bot;
 if (process.env.NODE_ENV === 'production') {
@@ -47,6 +64,8 @@ async function idAndMessage(ctx, next) {
 }
 bot.use(idAndMessage);
 
+
+
 let link = "https://www.mrk-bsuir.by/files/bbb22.02.2022.pdf";
 
 async function getTT(url) {
@@ -54,26 +73,24 @@ async function getTT(url) {
     const data = await response.text();
 
     const dom = new JSDOM(data);
-    link = dom.window.document.getElementById("rasp").href;
+    const link = dom.window.document.getElementById("rasp").href;
+    return link;
 }
-
-getTT("https://www.mrk-bsuir.by/ru");
-
-bot.command("timetable", async ctx => {
-    return ctx.reply(`Последнее расписание: ${link}`);
-});
+link = getTT("https://www.mrk-bsuir.by/ru");
 
 setTimeout(async function check() {
     try {
-        const response = await fetch("https://www.mrk-bsuir.by/ru");
-        const data = await response.text();
-
-        const dom = new JSDOM(data);
-        const newlink = dom.window.document.getElementById("rasp").href;
-        if (newlink == link);
-        else {
+        const newlink = getTT("https://www.mrk-bsuir.by/ru");
+        if (newlink != await link) {
             link = newlink;
-            bot.api.sendMessage(977463270, `Расписание обновилось: ${link}`)
+            bot.api.sendMessage(977463270, `Расписание обновилось`)
+
+            const response = await fetch(link);
+            const data = await response.buffer();
+            fs.writeFileSync("rasp.pdf", data);
+
+            //bot.api.sendDocument(977463270, "https://www.mrk-bsuir.by/files/7726.02.2022.pdf")
+
         }
     } catch (e) {
         console.log(e)
@@ -81,7 +98,14 @@ setTimeout(async function check() {
     setTimeout(check, 300000)
 }, 300000)
 
+bot.command("timetable", async ctx => {
+    return ctx.replyWithDocument(await link);
+});
 
+/*bot.command("get", async ctx => {
+    console.log("oh")
+    ctx.replyWithPhoto(977463270, "./ttpics/rasp-3.jpg");
+});*/
 
 
 
